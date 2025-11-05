@@ -1,0 +1,129 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
+}
+
+@layer components {
+  /* Custom scrollbar for sidebar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-gray-100;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-adyk-ocean rounded-full;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-adyk-accent;
+  }
+
+  /* Maritime wave animation */
+  .wave-animation {
+    background: linear-gradient(45deg,
+      transparent 30%,
+      rgba(62, 146, 204, 0.1) 50%,
+      transparent 70%);
+    background-size: 200% 200%;
+    animation: wave 15s ease-in-out infinite;
+  }
+
+  @keyframes wave {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  /* Card hover effects */
+  .vessel-card {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+
+  /* Map container */
+  .map-container {
+    @apply w-full h-full;
+  }
+
+  /* Ensure Leaflet map stays below modals */
+  .leaflet-container {
+    z-index: 1;
+  }
+
+  .leaflet-pane {
+    z-index: auto;
+  }
+
+  .leaflet-control {
+    z-index: 800;
+  }
+
+  /* Vessel marker container */
+  .vessel-marker-container {
+    pointer-events: auto !important;
+  }
+
+  /* Ship marker styling */
+  .ship-marker {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: #10b981;
+    filter: drop-shadow(0 3px 3px rgba(0,0,0,0.4));
+    pointer-events: auto;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.3s ease;
+  }
+
+  .ship-marker:hover {
+    transform: scale(1.15);
+  }
+
+  /* Coordinate popup styling */
+  .coordinate-popup {
+    @apply bg-slate-700 text-white text-xs rounded-lg px-3 py-2 shadow-xl;
+  }
+
+  .coordinate-popup .leaflet-popup-content-wrapper {
+    @apply bg-slate-700 text-white rounded-lg shadow-xl;
+  }
+
+  .coordinate-popup .leaflet-popup-tip {
+    @apply bg-slate-700;
+  }
+
+  /* Custom Leaflet popup override */
+  .leaflet-popup-content-wrapper {
+    border-radius: 0.5rem;
+  }
+
+  .leaflet-popup-tip-container {
+    display: block;
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply bg-adyk-ocean hover:bg-adyk-accent text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg;
+  }
+
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-adyk-navy font-semibold py-2 px-4 rounded-lg border-2 border-adyk-ocean transition-all duration-300;
+  }
+}
