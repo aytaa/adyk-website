@@ -6,7 +6,7 @@ import VesselCard from './VesselCard'
 import LoadingSpinner from './LoadingSpinner'
 import EmptyState from './EmptyState'
 import { filterVessels } from '../utils/helpers'
-import { vesselTypes } from '../data/mockVessels'
+import { vesselTypes, statusOptions } from '../data/mockVessels'
 
 const VesselSidebar = ({ vessels, selectedVessel, onVesselSelect, isLoading }) => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -48,6 +48,7 @@ const VesselSidebar = ({ vessels, selectedVessel, onVesselSelect, isLoading }) =
           filters={filters}
           onFilterChange={setFilters}
           vesselTypes={vesselTypes}
+          statusOptions={statusOptions}
         />
       </div>
 

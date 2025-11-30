@@ -1,23 +1,17 @@
 import { Filter, X } from 'lucide-react'
 import { useState } from 'react'
 
-const FilterPanel = ({ filters, onFilterChange, vesselTypes }) => {
+const FilterPanel = ({ filters, onFilterChange, vesselTypes = [], statusOptions = [] }) => {
   const [isOpen, setIsOpen] = useState(false)
 
-  const handleTypeToggle = (typeId) => {
-    const currentTypes = filters.type || []
-    const newTypes = currentTypes.includes(typeId)
-      ? currentTypes.filter(t => t !== typeId)
-      : [...currentTypes, typeId]
-    onFilterChange({ ...filters, type: newTypes })
+  // NEW FORMAT: Single select for vessel type
+  const handleVesselTypeChange = (vesselType) => {
+    onFilterChange({ ...filters, vesselType: vesselType || undefined })
   }
 
-  const handleStatusToggle = (statusId) => {
-    const currentStatuses = filters.status || []
-    const newStatuses = currentStatuses.includes(statusId)
-      ? currentStatuses.filter(s => s !== statusId)
-      : [...currentStatuses, statusId]
-    onFilterChange({ ...filters, status: newStatuses })
+  // NEW FORMAT: Single select for status
+  const handleStatusChange = (status) => {
+    onFilterChange({ ...filters, status: status || undefined })
   }
 
   const clearFilters = () => {
@@ -25,8 +19,8 @@ const FilterPanel = ({ filters, onFilterChange, vesselTypes }) => {
   }
 
   const hasActiveFilters = () => {
-    return (filters.type && filters.type.length > 0) ||
-           (filters.status && filters.status.length > 0) ||
+    return filters.vesselType ||
+           filters.status ||
            filters.minSpeed !== undefined ||
            filters.maxSpeed !== undefined
   }
@@ -66,44 +60,34 @@ const FilterPanel = ({ filters, onFilterChange, vesselTypes }) => {
       {/* Filter Content */}
       {isOpen && (
         <div className="mt-2 p-2 bg-white border border-gray-200 rounded-lg space-y-3">
-          {/* Vessel Type Filter */}
+          {/* Vessel Type Filter - NEW FORMAT (dropdown) */}
           <div>
             <h4 className="text-xs font-semibold text-gray-700 mb-1.5">Gemi Tipi</h4>
-            <div className="space-y-0.5">
-              {Object.entries(vesselTypes).map(([typeId, typeName]) => (
-                <label key={typeId} className="flex items-center space-x-1.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={filters.type?.includes(parseInt(typeId)) || false}
-                    onChange={() => handleTypeToggle(parseInt(typeId))}
-                    className="w-3.5 h-3.5 text-adyk-ocean border-gray-300 rounded focus:ring-adyk-ocean"
-                  />
-                  <span className="text-xs text-gray-600">{typeName}</span>
-                </label>
+            <select
+              value={filters.vesselType || ''}
+              onChange={(e) => handleVesselTypeChange(e.target.value)}
+              className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:border-adyk-ocean"
+            >
+              <option value="">Tümü</option>
+              {vesselTypes.map((type) => (
+                <option key={type} value={type}>{type}</option>
               ))}
-            </div>
+            </select>
           </div>
 
-          {/* Status Filter */}
+          {/* Status Filter - NEW FORMAT (dropdown) */}
           <div>
             <h4 className="text-xs font-semibold text-gray-700 mb-1.5">Durum</h4>
-            <div className="space-y-0.5">
-              {[
-                { id: 0, name: 'Seyirde' },
-                { id: 1, name: 'Demirde' },
-                { id: 5, name: 'Yanaşık' }
-              ].map((status) => (
-                <label key={status.id} className="flex items-center space-x-1.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={filters.status?.includes(status.id) || false}
-                    onChange={() => handleStatusToggle(status.id)}
-                    className="w-3.5 h-3.5 text-adyk-ocean border-gray-300 rounded focus:ring-adyk-ocean"
-                  />
-                  <span className="text-xs text-gray-600">{status.name}</span>
-                </label>
+            <select
+              value={filters.status || ''}
+              onChange={(e) => handleStatusChange(e.target.value)}
+              className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:border-adyk-ocean"
+            >
+              <option value="">Tümü</option>
+              {statusOptions.map((status) => (
+                <option key={status.value} value={status.value}>{status.label}</option>
               ))}
-            </div>
+            </select>
           </div>
 
           {/* Speed Filter */}

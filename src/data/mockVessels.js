@@ -1,7 +1,8 @@
 // Mock vessel data - Ready for MyShipTracking API integration
 // Data structure matches typical AIS API responses
 
-const vesselTypes = {
+// Legacy numeric vessel types (for old format)
+const vesselTypesLegacy = {
   70: 'Kargo Gemisi',
   80: 'Tanker',
   60: 'Yolcu Gemisi',
@@ -11,6 +12,17 @@ const vesselTypes = {
   52: 'Römorkör'
 }
 
+// NEW FORMAT: String-based vessel types
+const vesselTypes = [
+  'Motorlu',
+  'Yelkenli',
+  'Balıkçı',
+  'Kargo',
+  'Yolcu',
+  'Unknown'
+]
+
+// Legacy numeric navigation status
 const navigationStatus = {
   0: 'Seyirde',
   1: 'Demirde',
@@ -18,6 +30,13 @@ const navigationStatus = {
   5: 'Yanaşık',
   8: 'Yelkenle Seyirde'
 }
+
+// NEW FORMAT: String-based status options
+const statusOptions = [
+  { value: 'online', label: 'Çevrimiçi' },
+  { value: 'stale', label: 'Belirsiz' },
+  { value: 'offline', label: 'Çevrimdışı' }
+]
 
 // Turkish coastal coordinates
 const turkishCoordinates = [
@@ -31,12 +50,12 @@ const turkishCoordinates = [
   { lat: 37.8746, lon: 27.2663 }, // Kuşadası
 ]
 
-// Generate random vessel data
+// Generate random vessel data (legacy format)
 const generateVessel = (mmsi, index) => {
   const coord = turkishCoordinates[index % turkishCoordinates.length]
   const randomOffset = () => (Math.random() - 0.5) * 2 // Random offset within ~100km
 
-  const typeKey = Object.keys(vesselTypes)[Math.floor(Math.random() * Object.keys(vesselTypes).length)]
+  const typeKey = Object.keys(vesselTypesLegacy)[Math.floor(Math.random() * Object.keys(vesselTypesLegacy).length)]
   const statusKey = Object.keys(navigationStatus)[Math.floor(Math.random() * Object.keys(navigationStatus).length)]
 
   return {
@@ -45,7 +64,7 @@ const generateVessel = (mmsi, index) => {
     name: `${['M/V', 'M/T', 'S/Y', 'F/V'][Math.floor(Math.random() * 4)]} ${['MARMARA', 'EGE', 'AKDENIZ', 'KARADENIZ', 'BOSPHORUS', 'ANATOLIA', 'ISTANBUL', 'ANKARA'][Math.floor(Math.random() * 8)]} ${Math.floor(Math.random() * 100)}`,
     callsign: `TC${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${Math.floor(1000 + Math.random() * 9000)}`,
     type: parseInt(typeKey),
-    typeName: vesselTypes[typeKey],
+    typeName: vesselTypesLegacy[typeKey],
     status: parseInt(statusKey),
     statusName: navigationStatus[statusKey],
     position: {
@@ -84,4 +103,4 @@ const mmsiList = [
 
 export const mockVessels = mmsiList.map((mmsi, index) => generateVessel(mmsi, index))
 
-export { vesselTypes, navigationStatus }
+export { vesselTypes, vesselTypesLegacy, navigationStatus, statusOptions }

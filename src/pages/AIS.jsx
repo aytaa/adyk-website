@@ -5,7 +5,7 @@ import MapView from '../components/MapView'
 import VesselDetailModal from '../components/VesselDetailModal'
 import LoginModal from '../components/LoginModal'
 import RegisterModal from '../components/RegisterModal'
-import { useVesselWebSocket } from '../hooks/useVesselWebSocket'
+import useVesselWebSocket from '../hooks/useVesselWebSocket'
 import { isAuthenticated, logout } from '../utils/auth'
 import { LogOut } from 'lucide-react'
 
@@ -96,10 +96,11 @@ const AuthenticatedAIS = ({ onLogout }) => {
   const [showDetailModal, setShowDetailModal] = useState(false)
 
   // Use WebSocket hook for real-time data (only called when authenticated)
-  const { vessels, isConnected, hasReceivedData, lastUpdate, error, vesselsCount } = useVesselWebSocket()
+  const { vessels, connected, loading, lastUpdate, error } = useVesselWebSocket()
 
-  // Loading state based on whether we've received initial data
-  const isLoading = !hasReceivedData
+  // Connection and loading states
+  const isConnected = connected
+  const isLoading = loading
 
   // Handle vessel selection from sidebar or map
   const handleVesselSelect = (vessel) => {

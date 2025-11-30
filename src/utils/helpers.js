@@ -48,9 +48,20 @@ export const formatCoordinates = (lat, lon) => {
 }
 
 /**
- * Get status color class
+ * Get status color class - NEW FORMAT
  */
 export const getStatusColor = (status) => {
+  // New status format: 'online', 'stale', 'offline'
+  if (typeof status === 'string') {
+    const colors = {
+      online: 'text-green-600 bg-green-50',
+      stale: 'text-yellow-600 bg-yellow-50',
+      offline: 'text-red-600 bg-red-50'
+    }
+    return colors[status] || 'text-gray-600 bg-gray-50'
+  }
+
+  // Legacy numeric status
   const colors = {
     0: 'text-green-600 bg-green-50', // Seyirde
     1: 'text-blue-600 bg-blue-50', // Demirde
@@ -88,20 +99,32 @@ export const calculateDistance = (lat1, lon1, lat2, lon2) => {
 }
 
 /**
- * Filter vessels by search query
+ * Filter vessels by search query - NEW FORMAT
  */
 export const filterVessels = (vessels, searchQuery, filters = {}) => {
   let filtered = vessels
 
-  // Text search
+  // Text search - NEW FIELDS
   if (searchQuery) {
     const query = searchQuery.toLowerCase()
     filtered = filtered.filter(vessel =>
       vessel.name?.toLowerCase().includes(query) ||
       vessel.mmsi?.toString().includes(query) ||
-      vessel.imo?.toString().includes(query) ||
+      vessel.imei?.toLowerCase().includes(query) ||
+      vessel.callSign?.toLowerCase().includes(query) ||
+      vessel.userName?.toLowerCase().includes(query) ||
       vessel.destination?.toLowerCase().includes(query)
     )
+  }
+
+  // Vessel type filter - NEW FORMAT (string instead of number)
+  if (filters.vesselType) {
+    filtered = filtered.filter(vessel => vessel.vesselType === filters.vesselType)
+  }
+
+  // Status filter - NEW FORMAT ('online', 'stale', 'offline')
+  if (filters.status) {
+    filtered = filtered.filter(vessel => vessel.status === filters.status)
   }
 
   // Speed filter
@@ -112,15 +135,17 @@ export const filterVessels = (vessels, searchQuery, filters = {}) => {
     filtered = filtered.filter(vessel => vessel.speed <= filters.maxSpeed)
   }
 
-  // Type filter
-  if (filters.type && filters.type.length > 0) {
-    filtered = filtered.filter(vessel => filters.type.includes(vessel.type))
-  }
-
-  // Status filter
-  if (filters.status && filters.status.length > 0) {
-    filtered = filtered.filter(vessel => filters.status.includes(vessel.status))
-  }
-
   return filtered
+}
+
+/**
+ * Get status display name
+ */
+export const getStatusDisplayName = (status) => {
+  const statusMap = {
+    online: 'Çevrimiçi',
+    stale: 'Belirsiz',
+    offline: 'Çevrimdışı'
+  }
+  return statusMap[status] || status
 }
