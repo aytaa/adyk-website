@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Anchor, Ship } from 'lucide-react'
 
-const Navbar = ({ title = "ADYK", showBackButton = false }) => {
+const Navbar = ({ title = "ADYK Online", showBackButton = false }) => {
   return (
     <nav className="bg-slate-700 shadow-lg">
       <div className="container mx-auto px-4">

@@ -1,16 +1,101 @@
-import { useState } from 'react'
-import Navbar from '../components/Navbar'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import VesselSidebar from '../components/VesselSidebar'
 import MapView from '../components/MapView'
 import VesselDetailModal from '../components/VesselDetailModal'
+import LoginModal from '../components/LoginModal'
+import RegisterModal from '../components/RegisterModal'
 import { useVesselWebSocket } from '../hooks/useVesselWebSocket'
-import { Radio } from 'lucide-react'
+import { isAuthenticated, logout } from '../utils/auth'
+import { LogOut } from 'lucide-react'
 
 const AIS = () => {
+  const navigate = useNavigate()
+  const [isUserAuthenticated, setIsUserAuthenticated] = useState(false)
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [showRegisterModal, setShowRegisterModal] = useState(false)
+
+  // Check authentication on mount
+  useEffect(() => {
+    const authenticated = isAuthenticated()
+    setIsUserAuthenticated(authenticated)
+    if (!authenticated) {
+      setShowLoginModal(true)
+    }
+  }, [])
+
+  // Handle login success
+  const handleLoginSuccess = () => {
+    setIsUserAuthenticated(true)
+    setShowLoginModal(false)
+    // Force re-render to reconnect WebSocket with token
+    window.location.reload()
+  }
+
+  // Handle register success
+  const handleRegisterSuccess = () => {
+    setShowRegisterModal(false)
+    setShowLoginModal(true)
+  }
+
+  // Handle modal close (redirect to home)
+  const handleModalClose = () => {
+    navigate('/')
+  }
+
+  // Handle switch from login to register
+  const handleSwitchToRegister = () => {
+    setShowLoginModal(false)
+    setShowRegisterModal(true)
+  }
+
+  // Handle switch from register to login
+  const handleSwitchToLogin = () => {
+    setShowRegisterModal(false)
+    setShowLoginModal(true)
+  }
+
+  // Handle logout
+  const handleLogout = () => {
+    logout()
+    setIsUserAuthenticated(false)
+    navigate('/')
+  }
+
+  // If not authenticated, show only modals with dark background
+  if (!isUserAuthenticated) {
+    return (
+      <>
+        {showLoginModal && (
+          <LoginModal
+            onLoginSuccess={handleLoginSuccess}
+            onClose={handleModalClose}
+            onRegisterClick={handleSwitchToRegister}
+          />
+        )}
+        {showRegisterModal && (
+          <RegisterModal
+            onSuccess={handleRegisterSuccess}
+            onClose={handleModalClose}
+            onLoginClick={handleSwitchToLogin}
+          />
+        )}
+        {/* Dark background */}
+        <div className="min-h-screen bg-gray-900" />
+      </>
+    )
+  }
+
+  // If authenticated, render the authenticated component
+  return <AuthenticatedAIS onLogout={handleLogout} />
+}
+
+// Separate component for authenticated view with WebSocket
+const AuthenticatedAIS = ({ onLogout }) => {
   const [selectedVessel, setSelectedVessel] = useState(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
 
-  // Use WebSocket hook for real-time data
+  // Use WebSocket hook for real-time data (only called when authenticated)
   const { vessels, isConnected, lastUpdate, error, vesselsCount } = useVesselWebSocket()
 
   // Loading state based on connection and initial data
@@ -36,7 +121,20 @@ const AIS = () => {
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Navbar */}
-      <Navbar title="ADYK AIS Takip" />
+      <div className="bg-slate-700 shadow-lg">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-12">
+            <div className="text-lg font-bold text-white">ADYK Online - AIS Takip</div>
+            <button
+              onClick={onLogout}
+              className="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg transition-all duration-200 text-sm font-medium"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Çıkış</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Mobile Connection Status Bar */}
       <div className="md:hidden bg-white border-b border-gray-200 px-4 py-2">

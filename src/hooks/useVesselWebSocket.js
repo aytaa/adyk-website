@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
+import { getAccessToken } from '../utils/auth'
 
 const WS_URL = 'wss://ws.adyk.online'
 const RECONNECT_DELAY = 5000 // 5 seconds
@@ -93,10 +94,12 @@ export const useVesselWebSocket = () => {
 
   const connect = () => {
     try {
-      console.log('🔌 Connecting to WebSocket:', WS_URL)
+      const token = getAccessToken()
+      const wsUrlWithToken = token ? `${WS_URL}?token=${token}` : WS_URL
+      console.log('🔌 Connecting to WebSocket:', wsUrlWithToken)
       setError(null)
 
-      const ws = new WebSocket(WS_URL)
+      const ws = new WebSocket(wsUrlWithToken)
 
       ws.onopen = () => {
         console.log('✅ WebSocket connected')

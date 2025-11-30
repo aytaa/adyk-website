@@ -36,15 +36,15 @@ const Home = () => {
               </div>
 
               <h1 className="text-4xl md:text-6xl font-bold text-adyk-navy mb-6">
-                Türk Denizlerinde
-                <br />
                 <span className="bg-gradient-to-r from-adyk-ocean to-adyk-accent bg-clip-text text-transparent">
-                  Gemilerinizi İzleyin
+                  ADYK Online
                 </span>
+                <br />
+                Türk Denizlerinde Gemilerinizi İzleyin
               </h1>
 
               <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-                ADYK AIS Gemi Takip Sistemi ile Türk karasularındaki gemileri gerçek zamanlı olarak takip edin.
+                ADYK Online ile Türk karasularındaki gemileri gerçek zamanlı olarak takip edin.
                 Konum, hız, rota ve daha fazla bilgiye anında erişin.
               </p>
 
@@ -136,17 +136,41 @@ const Home = () => {
 
       {/* Footer */}
       <footer className="bg-adyk-navy text-white py-8">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <Anchor className="w-6 h-6" />
-            <span className="text-xl font-bold">ADYK</span>
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            {/* Logo and Title */}
+            <div className="flex items-center justify-center space-x-2 mb-4">
+              <Anchor className="w-6 h-6" />
+              <span className="text-xl font-bold">ADYK Online</span>
+            </div>
+
+            {/* Description */}
+            <p className="text-blue-200 text-sm text-center mb-4">
+              Türk Denizcilik Derneği - AIS Gemi Takip Sistemi
+            </p>
+
+            {/* Legal Links */}
+            <div className="flex items-center justify-center space-x-6 mb-4">
+              <Link
+                to="/privacy"
+                className="text-blue-200 hover:text-white transition-colors text-sm"
+              >
+                Gizlilik Politikası
+              </Link>
+              <span className="text-blue-400">•</span>
+              <Link
+                to="/terms"
+                className="text-blue-200 hover:text-white transition-colors text-sm"
+              >
+                Kullanım Koşulları
+              </Link>
+            </div>
+
+            {/* Copyright */}
+            <p className="text-blue-300 text-xs text-center">
+              © 2025 ADYK Online. Tüm hakları saklıdır.
+            </p>
           </div>
-          <p className="text-blue-200 text-sm">
-            Türk Denizcilik Derneği - AIS Gemi Takip Sistemi
-          </p>
-          <p className="text-blue-300 text-xs mt-2">
-            © 2024 ADYK. Tüm hakları saklıdır.
-          </p>
         </div>
       </footer>
     </div>
