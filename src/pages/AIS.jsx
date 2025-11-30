@@ -96,10 +96,10 @@ const AuthenticatedAIS = ({ onLogout }) => {
   const [showDetailModal, setShowDetailModal] = useState(false)
 
   // Use WebSocket hook for real-time data (only called when authenticated)
-  const { vessels, isConnected, lastUpdate, error, vesselsCount } = useVesselWebSocket()
+  const { vessels, isConnected, hasReceivedData, lastUpdate, error, vesselsCount } = useVesselWebSocket()
 
-  // Loading state based on connection and initial data
-  const isLoading = !isConnected && vessels.length === 0
+  // Loading state based on whether we've received initial data
+  const isLoading = !hasReceivedData
 
   // Handle vessel selection from sidebar or map
   const handleVesselSelect = (vessel) => {

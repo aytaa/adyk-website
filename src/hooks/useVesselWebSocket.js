@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { getAccessToken } from '../utils/auth'
 
 const WS_URL = 'wss://ws.adyk.online'
-const RECONNECT_DELAY = 5000 // 5 seconds
+const RECONNECT_DELAY = 3000 // 3 seconds
 
 // Map AIS type to vessel type name
 const getVesselTypeName = (aisType) => {
@@ -49,36 +49,46 @@ const getNavigationStatus = (navStatus) => {
   return statusMap[navStatus] || 'Bilinmiyor'
 }
 
-// Transform WebSocket vessel data to match app format
-const transformVesselData = (wsVessel) => {
+// Transform WebSocket vessel data to match app format - NEW FORMAT
+const transformVesselData = (vessel) => {
   return {
-    mmsi: wsVessel.mmsi,
-    imo: wsVessel.vessel?.imo || null,
-    name: wsVessel.name || 'Bilinmiyor',
-    callsign: wsVessel.vessel?.callsign || null,
-    type: wsVessel.vessel?.aisType || 0,
-    typeName: wsVessel.vessel?.shipType || getVesselTypeName(wsVessel.vessel?.aisType),
-    status: wsVessel.vessel?.navStatus || 0,
-    statusName: getNavigationStatus(wsVessel.vessel?.navStatus || 0),
+    // Core identification
+    id: vessel.id,
+    imei: vessel.imei,
+    mmsi: vessel.mmsi,
+    name: vessel.name || 'Bilinmiyor',
+    callsign: vessel.callSign || null,
+
+    // Vessel details
+    type: 0, // Not in new format
+    typeName: vessel.vesselType || 'Bilinmiyor',
+    status: vessel.status || 0,
+    statusName: getNavigationStatus(vessel.status || 0),
+    flag: vessel.flag || 'TR',
+
+    // Position data
     position: {
-      lat: wsVessel.gps?.latitude || 0,
-      lon: wsVessel.gps?.longitude || 0,
+      lat: vessel.position?.latitude || 0,
+      lon: vessel.position?.longitude || 0,
       accuracy: true
     },
-    speed: wsVessel.gps?.speed || 0,
-    course: wsVessel.gps?.direction || 0,
-    heading: wsVessel.gps?.direction || 0,
-    destination: wsVessel.vessel?.destination || null,
+    speed: vessel.position?.speed || 0,
+    course: vessel.position?.direction || 0,
+    heading: vessel.position?.direction || 0,
+
+    // Additional data
+    destination: null,
     eta: null,
     draught: null,
     length: null,
     width: null,
-    flag: wsVessel.vessel?.flag || 'TR',
-    lastUpdate: wsVessel.timestamp || new Date().toISOString(),
+    lastUpdate: vessel.lastUpdate || new Date().toISOString(),
     photo: null,
-    // Additional fields from WebSocket
-    currentPort: wsVessel.vessel?.currentPort || null,
-    lastPort: wsVessel.vessel?.lastPort || null
+
+    // User tracking info
+    userId: vessel.userId,
+    userName: vessel.userName,
+    mapped: vessel.mapped
   }
 }
 
@@ -86,6 +96,7 @@ export const useVesselWebSocket = () => {
   const [vessels, setVessels] = useState([])
   const [trackers, setTrackers] = useState([])
   const [isConnected, setIsConnected] = useState(false)
+  const [hasReceivedData, setHasReceivedData] = useState(false)
   const [lastUpdate, setLastUpdate] = useState(null)
   const [error, setError] = useState(null)
   const wsRef = useRef(null)
@@ -95,8 +106,16 @@ export const useVesselWebSocket = () => {
   const connect = () => {
     try {
       const token = getAccessToken()
-      const wsUrlWithToken = token ? `${WS_URL}?token=${token}` : WS_URL
-      console.log('🔌 Connecting to WebSocket:', wsUrlWithToken)
+
+      if (!token) {
+        console.error('❌ No token found')
+        setError('Token bulunamadı')
+        setHasReceivedData(true) // Prevent infinite loading
+        return
+      }
+
+      const wsUrlWithToken = `${WS_URL}?token=${token}`
+      console.log('🔌 Connecting to WebSocket')
       setError(null)
 
       const ws = new WebSocket(wsUrlWithToken)
@@ -111,27 +130,50 @@ export const useVesselWebSocket = () => {
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data)
-          console.log('📦 Received data:', {
-            vessels: data.vessels?.length || 0,
-            trackers: data.trackers?.length || 0,
-            timestamp: data.timestamp
-          })
 
-          // Transform and set vessels
-          if (data.vessels && Array.isArray(data.vessels)) {
-            const transformedVessels = data.vessels.map(transformVesselData)
+          // Handle authentication response
+          if (data.type === 'auth') {
+            if (data.success) {
+              console.log('[WS] ✅ Authenticated')
+            } else {
+              console.error('[WS] ❌ Authentication failed:', data.message)
+              setError('Kimlik doğrulama hatası')
+            }
+            return
+          }
+
+          // Handle vessel data update - NEW FORMAT
+          if (data.type === 'update') {
+            const allVessels = data.data || []
+            const mappedVessels = allVessels.filter(v => v.mapped === true)
+
+            console.log('📦 Received update:', {
+              total: allVessels.length,
+              mapped: mappedVessels.length,
+              timestamp: data.timestamp
+            })
+
+            // Mark that we've received initial data
+            setHasReceivedData(true)
+
+            // Transform vessels to app format
+            const transformedVessels = mappedVessels.map(transformVesselData)
             setVessels(transformedVessels)
+
+            // Update trackers (unmapped vessels)
+            const unmappedVessels = allVessels.filter(v => v.mapped === false)
+            setTrackers(unmappedVessels)
+
+            // Update last update timestamp
+            if (data.timestamp) {
+              setLastUpdate(new Date(data.timestamp))
+            }
+
+            return
           }
 
-          // Set trackers (if any)
-          if (data.trackers && Array.isArray(data.trackers)) {
-            setTrackers(data.trackers)
-          }
-
-          // Update last update timestamp
-          if (data.timestamp) {
-            setLastUpdate(new Date(data.timestamp))
-          }
+          // Log unknown message types
+          console.log('⚠️ Unknown message type:', data.type)
         } catch (error) {
           console.error('❌ Error parsing WebSocket message:', error)
           setError('Veri işlenirken hata oluştu')
@@ -147,6 +189,14 @@ export const useVesselWebSocket = () => {
       ws.onclose = (event) => {
         console.log('🔌 WebSocket disconnected', event.code, event.reason)
         setIsConnected(false)
+
+        // Don't reconnect on authentication errors
+        if (event.code === 4001 || event.code === 4002) {
+          console.error('❌ Authentication error - not reconnecting')
+          setError('Oturum hatası')
+          setHasReceivedData(true) // Prevent infinite loading
+          return
+        }
 
         // Auto-reconnect with exponential backoff (max 30 seconds)
         reconnectAttemptsRef.current += 1
@@ -191,6 +241,7 @@ export const useVesselWebSocket = () => {
     vessels,
     trackers,
     isConnected,
+    hasReceivedData,
     lastUpdate,
     error,
     totalCount: vessels.length + trackers.length,
