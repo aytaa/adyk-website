@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Anchor, Loader2 } from 'lucide-react'
 import PhoneInput, { sortedCountries } from '../components/PhoneInput'
 import OTPInput from '../components/OTPInput'
-import { sendOTP, verifyOTP, isAuthenticated, getSubscriptionStatus } from '../utils/auth'
+import { sendOTP, verifyOTP, isAuthenticated } from '../utils/auth'
 
 const Login = () => {
   const navigate = useNavigate()
@@ -17,7 +17,7 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated()) {
-      routeBySubscription()
+      navigate('/ais', { replace: true })
     }
   }, [])
 
@@ -30,19 +30,6 @@ const Login = () => {
   const getFullPhone = () => {
     const digits = phone.replace(/\D/g, '')
     return selectedCountry.dialCode + digits
-  }
-
-  const routeBySubscription = async () => {
-    try {
-      const status = await getSubscriptionStatus()
-      if (status.hasSubscription && (status.status === 'active' || status.status === 'grace')) {
-        navigate('/ais', { replace: true })
-      } else {
-        navigate('/subscription', { replace: true })
-      }
-    } catch {
-      navigate('/subscription', { replace: true })
-    }
   }
 
   const handleSendCode = async (e) => {
@@ -77,7 +64,7 @@ const Login = () => {
     setLoading(true)
     try {
       await verifyOTP(getFullPhone(), otp)
-      await routeBySubscription()
+      navigate('/ais', { replace: true })
     } catch (err) {
       setError(err.message)
     } finally {
