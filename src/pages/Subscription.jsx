@@ -149,8 +149,8 @@ const Subscription = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-adyk-navy text-white px-4 py-4 flex items-center justify-between">
+      {/* Fixed Header */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-adyk-navy text-white px-4 py-4 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-2">
           <Anchor className="w-6 h-6" />
           <span className="font-bold text-lg">ADYK</span>
@@ -160,7 +160,7 @@ const Subscription = () => {
         </button>
       </div>
 
-      <div className="max-w-lg mx-auto p-4 py-8 space-y-6">
+      <div className="max-w-lg mx-auto p-4 pt-20 pb-8 space-y-6">
         {/* Active subscription info */}
         {hasActive && (
           <div className="bg-white rounded-xl border border-green-200 p-5 space-y-3">

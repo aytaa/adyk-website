@@ -134,11 +134,10 @@ const AddressForm = ({ form, onChange, errors }) => {
         <input
           type="tel"
           value={form.phone}
-          onChange={handleChange('phone')}
-          placeholder="Telefon numarası"
-          className={fieldClass('phone')}
+          readOnly
+          disabled
+          className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
         />
-        {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-3">

@@ -1,22 +1,42 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import VesselSidebar from '../components/VesselSidebar'
 import MapView from '../components/MapView'
 import VesselDetailModal from '../components/VesselDetailModal'
 import useVesselWebSocket from '../hooks/useVesselWebSocket'
-import { logout } from '../utils/auth'
-import { LogOut } from 'lucide-react'
+import { logout, getSubscriptionStatus } from '../utils/auth'
+import { LogOut, Loader2 } from 'lucide-react'
 
 const AIS = () => {
   const navigate = useNavigate()
   const [selectedVessel, setSelectedVessel] = useState(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
+  const [subLoading, setSubLoading] = useState(true)
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false)
 
   // Use WebSocket hook for real-time data
   const { vessels, connected, loading, lastUpdate, error } = useVesselWebSocket()
 
   const isConnected = connected
   const isLoading = loading
+
+  // Check subscription on mount
+  useEffect(() => {
+    const checkSubscription = async () => {
+      try {
+        const res = await getSubscriptionStatus()
+        const data = res.data || res
+        const active = data.hasSubscription && ['active', 'grace'].includes(data.status)
+        setHasActiveSubscription(active)
+      } catch (err) {
+        console.error('Subscription check failed:', err)
+        setHasActiveSubscription(false)
+      } finally {
+        setSubLoading(false)
+      }
+    }
+    checkSubscription()
+  }, [])
 
   const handleVesselSelect = (vessel) => {
     setSelectedVessel(vessel)
@@ -35,6 +55,18 @@ const AIS = () => {
   const handleLogout = () => {
     logout()
     navigate('/')
+  }
+
+  // Loading state while checking subscription
+  if (subLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="w-10 h-10 text-adyk-ocean animate-spin mx-auto mb-3" />
+          <p className="text-sm text-gray-600">Abonelik kontrol ediliyor...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -76,7 +108,7 @@ const AIS = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         {/* Sidebar */}
         <VesselSidebar
           vessels={vessels}
@@ -86,7 +118,7 @@ const AIS = () => {
         />
 
         {/* Map Area */}
-        <div className="flex-1 relative">
+        <div className={`flex-1 relative ${!hasActiveSubscription ? 'filter blur-sm pointer-events-none' : ''}`}>
           {isLoading ? (
             <div className="w-full h-full flex items-center justify-center bg-blue-50">
               <div className="text-center">
@@ -103,10 +135,31 @@ const AIS = () => {
             />
           )}
         </div>
+
+        {/* Subscription required overlay */}
+        {!hasActiveSubscription && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl">
+              <div className="text-6xl mb-4">🔒</div>
+              <h2 className="text-2xl font-bold text-adyk-navy mb-4">
+                Aboneliğinizi Aktif Edin
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Harita ve tekne takip özelliklerini kullanabilmek için abonelik satın almanız gerekmektedir.
+              </p>
+              <button
+                onClick={() => navigate('/subscription')}
+                className="w-full bg-adyk-ocean text-white py-3 px-6 rounded-lg font-semibold hover:bg-adyk-accent transition-colors"
+              >
+                Abonelik Satın Al
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Vessel Detail Modal */}
-      {showDetailModal && selectedVessel && (
+      {hasActiveSubscription && showDetailModal && selectedVessel && (
         <VesselDetailModal
           vessel={selectedVessel}
           onClose={handleCloseModal}
