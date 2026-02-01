@@ -12,6 +12,7 @@ const Subscription = () => {
   const [subStatus, setSubStatus] = useState(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [submitStep, setSubmitStep] = useState('')
   const [error, setError] = useState('')
 
   // Device selection
@@ -72,13 +73,17 @@ const Subscription = () => {
 
     setError('')
     setSubmitting(true)
+
     try {
-      const items = [{ type: selectedDevice, quantity: 1 }]
+      // Step 1: Create order
+      setSubmitStep('Sipariş oluşturuluyor...')
+
+      const items = [{ type: selectedDevice }]
       if (tagSelected) {
-        items.push({ type: 'tag', quantity: 1 })
+        items.push({ type: 'tag' })
       }
 
-      const order = await createOrder({
+      const orderRes = await createOrder({
         items,
         fullName: addressForm.fullName,
         phone: addressForm.phone,
@@ -87,12 +92,30 @@ const Subscription = () => {
         district: addressForm.district,
       })
 
-      const payment = await initPayment(order.orderId || order.id)
-      setPaytrToken(payment.token || payment.iframeToken)
+      // API returns { success, data: { orderId } }
+      const orderId = orderRes.data?.orderId || orderRes.orderId || orderRes.id
+      if (!orderId) {
+        throw new Error('Sipariş oluşturulamadı: orderId alınamadı')
+      }
+
+      // Step 2: Init payment with orderId
+      setSubmitStep('Ödeme sayfası hazırlanıyor...')
+
+      const paymentRes = await initPayment(orderId)
+
+      // API returns { success, data: { token } }
+      const token = paymentRes.data?.token || paymentRes.token || paymentRes.iframeToken
+      if (!token) {
+        throw new Error('Ödeme başlatılamadı: token alınamadı')
+      }
+
+      // Step 3: Show PayTR iframe
+      setPaytrToken(token)
     } catch (err) {
       setError(err.message)
     } finally {
       setSubmitting(false)
+      setSubmitStep('')
     }
   }
 
@@ -214,7 +237,10 @@ const Subscription = () => {
                 flex items-center justify-center gap-2"
             >
               {submitting ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>{submitStep}</span>
+                </>
               ) : (
                 'Ödemeye Geç'
               )}
