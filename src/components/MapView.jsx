@@ -119,7 +119,6 @@ const MapEvents = ({ setMouseCoords }) => {
 // Right Tool Menu Component
 const RightToolMenu = ({ currentLayer, onLayerChange }) => {
   const [showLayerMenu, setShowLayerMenu] = useState(false)
-  const [showLoginModal, setShowLoginModal] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const map = useMap()
 
@@ -219,11 +218,10 @@ const RightToolMenu = ({ currentLayer, onLayerChange }) => {
             <Crosshair className="w-5 h-5" />
           </button>
 
-          {/* Favorites - Login Required */}
+          {/* Favorites */}
           <button
-            onClick={() => setShowLoginModal(true)}
-            className="w-11 h-11 flex items-center justify-center text-white hover:bg-slate-600 transition-colors"
-            title="Favoriler"
+            className="w-11 h-11 flex items-center justify-center text-white hover:bg-slate-600 transition-colors opacity-50 cursor-not-allowed"
+            title="Favoriler (Yakında)"
           >
             <Heart className="w-5 h-5" />
           </button>
@@ -243,30 +241,6 @@ const RightToolMenu = ({ currentLayer, onLayerChange }) => {
         </div>
       </div>
 
-      {/* Login Modal */}
-      {showLoginModal && (
-        <div className="fixed inset-0 bg-black/50 z-[9998] flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4">
-            <div className="bg-slate-700 text-white p-4 rounded-t-lg">
-              <h3 className="text-lg font-semibold">Üyelik Gerekli</h3>
-            </div>
-            <div className="p-4">
-              <p className="text-gray-700 mb-4">Favori eklemek için üye olmanız gerekiyor.</p>
-              <div className="flex gap-2">
-                <button className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors">
-                  Giriş Yap
-                </button>
-                <button
-                  onClick={() => setShowLoginModal(false)}
-                  className="flex-1 bg-gray-200 text-gray-700 py-2 rounded hover:bg-gray-300 transition-colors"
-                >
-                  Kapat
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   )
 }
