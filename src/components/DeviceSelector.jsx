@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Radio, Wifi, Tag } from 'lucide-react'
+import { Radio, Wifi, Tag, ShoppingCart } from 'lucide-react'
 import { getPricing } from '../utils/auth'
 import LoadingSpinner from './LoadingSpinner'
 
@@ -39,16 +39,20 @@ const DeviceSelector = ({ selectedDevice, onDeviceChange, tagSelected, onTagChan
   const devices = pricing.filter((p) => p.type === '2g' || p.type === '4g')
   const tagItem = pricing.find((p) => p.type === 'tag')
 
+  const selectedDeviceItem = pricing.find((p) => p.type === selectedDevice)
+
   return (
     <div className="space-y-4">
       <h3 className="text-sm font-semibold text-gray-700">Cihaz Seçimi</h3>
+
+      {/* Tracker radio buttons */}
       <div className="space-y-2">
         {devices.map((device) => (
           <label
             key={device.type}
             className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors
               ${selectedDevice === device.type
-                ? 'border-adyk-ocean bg-adyk-light/30'
+                ? 'border-adyk-ocean bg-adyk-light/30 shadow-sm'
                 : 'border-gray-200 hover:border-gray-300'
               }`}
           >
@@ -61,9 +65,9 @@ const DeviceSelector = ({ selectedDevice, onDeviceChange, tagSelected, onTagChan
               className="accent-adyk-ocean"
             />
             {device.type === '2g' ? (
-              <Radio className="w-5 h-5 text-adyk-accent" />
+              <Radio className="w-5 h-5 text-adyk-accent flex-shrink-0" />
             ) : (
-              <Wifi className="w-5 h-5 text-adyk-accent" />
+              <Wifi className="w-5 h-5 text-adyk-accent flex-shrink-0" />
             )}
             <span className="flex-1 text-sm font-medium text-gray-800">{device.name}</span>
             <span className="text-sm font-semibold text-adyk-navy">{device.price.toLocaleString('tr-TR')} TL</span>
@@ -71,11 +75,12 @@ const DeviceSelector = ({ selectedDevice, onDeviceChange, tagSelected, onTagChan
         ))}
       </div>
 
+      {/* Tag checkbox */}
       {tagItem && (
         <label
           className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors
             ${tagSelected
-              ? 'border-adyk-ocean bg-adyk-light/30'
+              ? 'border-adyk-ocean bg-adyk-light/30 shadow-sm'
               : 'border-gray-200 hover:border-gray-300'
             }`}
         >
@@ -85,16 +90,38 @@ const DeviceSelector = ({ selectedDevice, onDeviceChange, tagSelected, onTagChan
             onChange={(e) => onTagChange(e.target.checked)}
             className="accent-adyk-ocean w-4 h-4"
           />
-          <Tag className="w-5 h-5 text-adyk-accent" />
+          <Tag className="w-5 h-5 text-adyk-accent flex-shrink-0" />
           <span className="flex-1 text-sm font-medium text-gray-800">{tagItem.name}</span>
           <span className="text-sm font-semibold text-adyk-navy">+{tagItem.price.toLocaleString('tr-TR')} TL</span>
         </label>
       )}
 
-      {total > 0 && (
-        <div className="flex justify-between items-center pt-3 border-t border-gray-200">
-          <span className="text-sm font-semibold text-gray-700">Toplam</span>
-          <span className="text-lg font-bold text-adyk-navy">{total.toLocaleString('tr-TR')} TL</span>
+      {/* Price breakdown */}
+      {(selectedDeviceItem || tagSelected) && (
+        <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+          <div className="flex items-center gap-2 mb-3">
+            <ShoppingCart className="w-4 h-4 text-adyk-navy" />
+            <span className="text-sm font-semibold text-adyk-navy">Seçilen Cihazlar</span>
+          </div>
+
+          {selectedDeviceItem && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">{selectedDeviceItem.name}</span>
+              <span className="font-medium text-gray-800">{selectedDeviceItem.price.toLocaleString('tr-TR')} TL</span>
+            </div>
+          )}
+
+          {tagSelected && tagItem && (
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">{tagItem.name}</span>
+              <span className="font-medium text-gray-800">{tagItem.price.toLocaleString('tr-TR')} TL</span>
+            </div>
+          )}
+
+          <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between">
+            <span className="text-sm font-semibold text-gray-700">Toplam</span>
+            <span className="text-lg font-bold text-adyk-navy">{total.toLocaleString('tr-TR')} TL</span>
+          </div>
         </div>
       )}
     </div>
