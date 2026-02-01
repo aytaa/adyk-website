@@ -71,8 +71,8 @@ const AIS = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      {/* Navbar */}
-      <div className="bg-slate-700 shadow-lg">
+      {/* Navbar - always above modal overlay */}
+      <div className="bg-slate-700 shadow-lg relative z-[60]">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-12">
             <div className="text-lg font-bold text-white">ADYK Online - AIS Takip</div>
@@ -138,7 +138,7 @@ const AIS = () => {
 
         {/* Subscription required overlay */}
         {!hasActiveSubscription && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="fixed top-12 left-0 right-0 bottom-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 max-w-sm mx-4 text-center shadow-2xl">
               <div className="w-16 h-16 bg-adyk-light rounded-full flex items-center justify-center mx-auto mb-4">
                 <Anchor className="w-8 h-8 text-adyk-ocean" />
