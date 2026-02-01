@@ -60,7 +60,7 @@ export const login = async (email, password) => {
 
 // Phone-based auth
 export const sendOTP = async (phoneNumber) => {
-  const body = { phoneNumber }
+  const body = { phone: phoneNumber }
   console.log('[sendOTP] Request:', `${BASE_API}/mobile/auth/send-code`, body)
   const response = await fetch(`${BASE_API}/mobile/auth/send-code`, {
     method: 'POST',
@@ -75,7 +75,7 @@ export const sendOTP = async (phoneNumber) => {
 }
 
 export const verifyOTP = async (phoneNumber, code) => {
-  const body = { phoneNumber, code }
+  const body = { phone: phoneNumber, code }
   console.log('[verifyOTP] Request:', `${BASE_API}/mobile/auth/verify-code`, body)
   const response = await fetch(`${BASE_API}/mobile/auth/verify-code`, {
     method: 'POST',
