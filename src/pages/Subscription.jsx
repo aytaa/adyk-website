@@ -187,7 +187,7 @@ const Subscription = () => {
 
             <DeviceSelector
               selectedDevice={selectedDevice}
-              onDeviceChange={setSelectedDevice}
+              onDeviceChange={(val) => { setSelectedDevice(val); setError('') }}
               tagSelected={tagSelected}
               onTagChange={setTagSelected}
               total={total}
