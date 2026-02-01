@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Anchor, Loader2 } from 'lucide-react'
-import PhoneInput from '../components/PhoneInput'
+import PhoneInput, { sortedCountries } from '../components/PhoneInput'
 import OTPInput from '../components/OTPInput'
 import { sendOTP, verifyOTP, isAuthenticated, getSubscriptionStatus } from '../utils/auth'
 
 const Login = () => {
   const navigate = useNavigate()
+  const [selectedCountry, setSelectedCountry] = useState(sortedCountries[0]) // Turkey
   const [phone, setPhone] = useState('')
   const [otp, setOtp] = useState('')
   const [step, setStep] = useState('phone') // 'phone' | 'otp'
@@ -27,7 +28,8 @@ const Login = () => {
   }, [countdown])
 
   const getFullPhone = () => {
-    return '+90' + phone.replace(/\s/g, '')
+    const digits = phone.replace(/\D/g, '')
+    return selectedCountry.dialCode + digits
   }
 
   const routeBySubscription = async () => {
@@ -45,8 +47,8 @@ const Login = () => {
 
   const handleSendCode = async (e) => {
     e.preventDefault()
-    const digits = phone.replace(/\s/g, '')
-    if (digits.length < 10) {
+    const digits = phone.replace(/\D/g, '')
+    if (digits.length < selectedCountry.maxLength) {
       setError('Geçerli bir telefon numarası girin')
       return
     }
@@ -110,10 +112,13 @@ const Login = () => {
 
         {step === 'phone' ? (
           <form onSubmit={handleSendCode} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Telefon Numarası</label>
-              <PhoneInput value={phone} onChange={setPhone} disabled={loading} />
-            </div>
+            <PhoneInput
+              value={phone}
+              onChange={setPhone}
+              disabled={loading}
+              selectedCountry={selectedCountry}
+              onCountryChange={setSelectedCountry}
+            />
 
             {error && (
               <p className="text-red-500 text-sm text-center">{error}</p>
@@ -140,7 +145,7 @@ const Login = () => {
                 Doğrulama Kodu
               </label>
               <p className="text-xs text-gray-500 text-center mb-4">
-                +90 {phone} numarasına gönderilen 6 haneli kodu girin
+                {getFullPhone()} numarasına gönderilen 6 haneli kodu girin
               </p>
               <OTPInput value={otp} onChange={setOtp} disabled={loading} />
             </div>
