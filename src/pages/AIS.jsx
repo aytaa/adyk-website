@@ -5,7 +5,7 @@ import MapView from '../components/MapView'
 import VesselDetailModal from '../components/VesselDetailModal'
 import useVesselWebSocket from '../hooks/useVesselWebSocket'
 import { logout, getSubscriptionStatus } from '../utils/auth'
-import { LogOut, Loader2 } from 'lucide-react'
+import { LogOut, Loader2, Anchor, Check } from 'lucide-react'
 
 const AIS = () => {
   const navigate = useNavigate()
@@ -118,7 +118,7 @@ const AIS = () => {
         />
 
         {/* Map Area */}
-        <div className={`flex-1 relative ${!hasActiveSubscription ? 'filter blur-sm pointer-events-none' : ''}`}>
+        <div className={`flex-1 relative ${!hasActiveSubscription ? 'filter blur-md pointer-events-none' : ''}`}>
           {isLoading ? (
             <div className="w-full h-full flex items-center justify-center bg-blue-50">
               <div className="text-center">
@@ -139,17 +139,37 @@ const AIS = () => {
         {/* Subscription required overlay */}
         {!hasActiveSubscription && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl">
-              <div className="text-6xl mb-4">🔒</div>
-              <h2 className="text-2xl font-bold text-adyk-navy mb-4">
+            <div className="bg-white rounded-xl p-6 max-w-sm mx-4 text-center shadow-2xl">
+              <div className="w-16 h-16 bg-adyk-light rounded-full flex items-center justify-center mx-auto mb-4">
+                <Anchor className="w-8 h-8 text-adyk-ocean" />
+              </div>
+              <h2 className="text-xl font-bold text-adyk-navy mb-3">
                 Aboneliğinizi Aktif Edin
               </h2>
-              <p className="text-gray-600 mb-6">
-                Harita ve tekne takip özelliklerini kullanabilmek için abonelik satın almanız gerekmektedir.
+              <p className="text-gray-600 text-sm mb-4">
+                Tüm özelliklere erişim için abonelik gereklidir:
               </p>
+              <ul className="text-left text-sm text-gray-600 space-y-2 mb-5">
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  Gerçek zamanlı tekne takibi
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  Geofence alarm bildirimleri
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  Hareket ve sintine sensörleri
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  7/24 konum geçmişi
+                </li>
+              </ul>
               <button
                 onClick={() => navigate('/subscription')}
-                className="w-full bg-adyk-ocean text-white py-3 px-6 rounded-lg font-semibold hover:bg-adyk-accent transition-colors"
+                className="w-full bg-adyk-ocean text-white py-2.5 px-5 rounded-lg font-medium hover:bg-adyk-accent transition-colors text-sm"
               >
                 Abonelik Satın Al
               </button>
