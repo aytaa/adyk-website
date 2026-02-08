@@ -5,15 +5,21 @@ import FilterPanel from './FilterPanel'
 import VesselCard from './VesselCard'
 import LoadingSpinner from './LoadingSpinner'
 import EmptyState from './EmptyState'
-import { filterVessels } from '../utils/helpers'
-import { vesselTypes, statusOptions } from '../data/mockVessels'
 
-const VesselSidebar = ({ vessels, selectedVessel, onVesselSelect, isLoading }) => {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filters, setFilters] = useState({})
+const VesselSidebar = ({
+  filteredVessels,
+  totalCount,
+  selectedVessel,
+  onVesselSelect,
+  isLoading,
+  searchQuery,
+  onSearchChange,
+  filters,
+  onFilterChange,
+  vesselTypes,
+  statusOptions
+}) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
-
-  const filteredVessels = filterVessels(vessels, searchQuery, filters)
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-gray-50">
@@ -23,7 +29,7 @@ const VesselSidebar = ({ vessels, selectedVessel, onVesselSelect, isLoading }) =
           <h2 className="text-base font-bold text-adyk-navy">
             Gemiler
             <span className="ml-1 text-xs font-normal text-gray-500">
-              ({filteredVessels.length})
+              ({filteredVessels.length}/{totalCount})
             </span>
           </h2>
           <button
@@ -37,7 +43,7 @@ const VesselSidebar = ({ vessels, selectedVessel, onVesselSelect, isLoading }) =
         {/* Search */}
         <SearchBar
           value={searchQuery}
-          onChange={setSearchQuery}
+          onChange={onSearchChange}
           placeholder="Gemi veya MMSI ara..."
         />
       </div>
@@ -46,7 +52,7 @@ const VesselSidebar = ({ vessels, selectedVessel, onVesselSelect, isLoading }) =
       <div className="p-2 bg-white border-b border-gray-200">
         <FilterPanel
           filters={filters}
-          onFilterChange={setFilters}
+          onFilterChange={onFilterChange}
           vesselTypes={vesselTypes}
           statusOptions={statusOptions}
         />

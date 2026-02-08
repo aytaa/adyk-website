@@ -135,6 +135,16 @@ export const filterVessels = (vessels, searchQuery, filters = {}) => {
     filtered = filtered.filter(vessel => vessel.speed <= filters.maxSpeed)
   }
 
+  // Doctor filter
+  if (filters.onlyDoctors) {
+    filtered = filtered.filter(vessel => vessel.ownerIsDoctor === true)
+  }
+
+  // Diver filter
+  if (filters.onlyDivers) {
+    filtered = filtered.filter(vessel => vessel.ownerIsDiver === true)
+  }
+
   return filtered
 }
 

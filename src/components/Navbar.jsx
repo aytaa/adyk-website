@@ -17,8 +17,8 @@ const Navbar = ({ title = "ADYK Online", showBackButton = false }) => {
         setShowMenu(false)
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
   }, [])
 
   const handleLogout = () => {
@@ -67,9 +67,9 @@ const Navbar = ({ title = "ADYK Online", showBackButton = false }) => {
               <span>AIS Takip</span>
             </Link>
             {authenticated ? (
-              <div className="relative" ref={menuRef}>
+              <div className="relative z-[9999]" ref={menuRef}>
                 <button
-                  onClick={() => setShowMenu(!showMenu)}
+                  onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
                   className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg transition-all duration-200 font-medium text-sm"
                 >
                   <div className="w-6 h-6 bg-adyk-ocean rounded-full flex items-center justify-center text-xs font-bold">
@@ -80,10 +80,10 @@ const Navbar = ({ title = "ADYK Online", showBackButton = false }) => {
                 </button>
 
                 {showMenu && (
-                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg py-2 z-50">
+                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg py-2 z-[9999]">
                     <Link
                       to="/profile"
-                      onClick={(e) => { e.stopPropagation(); setShowMenu(false); }}
+                      onClick={(e) => { e.stopPropagation(); setTimeout(() => setShowMenu(false), 100); }}
                       className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
                     >
                       <User className="w-4 h-4 text-gray-500" />
@@ -91,7 +91,7 @@ const Navbar = ({ title = "ADYK Online", showBackButton = false }) => {
                     </Link>
                     <Link
                       to="/my-devices"
-                      onClick={(e) => { e.stopPropagation(); setShowMenu(false); }}
+                      onClick={(e) => { e.stopPropagation(); setTimeout(() => setShowMenu(false), 100); }}
                       className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
                     >
                       <Smartphone className="w-4 h-4 text-gray-500" />
@@ -99,7 +99,7 @@ const Navbar = ({ title = "ADYK Online", showBackButton = false }) => {
                     </Link>
                     <Link
                       to="/my-subscriptions"
-                      onClick={(e) => { e.stopPropagation(); setShowMenu(false); }}
+                      onClick={(e) => { e.stopPropagation(); setTimeout(() => setShowMenu(false), 100); }}
                       className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
                     >
                       <CreditCard className="w-4 h-4 text-gray-500" />
@@ -136,9 +136,9 @@ const Navbar = ({ title = "ADYK Online", showBackButton = false }) => {
               <Ship className="w-4 h-4" />
             </Link>
             {authenticated ? (
-              <div className="relative" ref={!showMenu ? undefined : menuRef}>
+              <div className="relative z-[9999]" ref={menuRef}>
                 <button
-                  onClick={() => setShowMenu(!showMenu)}
+                  onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
                   className="flex items-center bg-white/10 hover:bg-white/20 text-white px-2 py-1.5 rounded-lg transition-all duration-200"
                 >
                   <div className="w-6 h-6 bg-adyk-ocean rounded-full flex items-center justify-center text-xs font-bold">
@@ -148,10 +148,10 @@ const Navbar = ({ title = "ADYK Online", showBackButton = false }) => {
                 </button>
 
                 {showMenu && (
-                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg py-2 z-50">
+                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg py-2 z-[9999]">
                     <Link
                       to="/profile"
-                      onClick={(e) => { e.stopPropagation(); setShowMenu(false); }}
+                      onClick={(e) => { e.stopPropagation(); setTimeout(() => setShowMenu(false), 100); }}
                       className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
                     >
                       <User className="w-4 h-4 text-gray-500" />
@@ -159,7 +159,7 @@ const Navbar = ({ title = "ADYK Online", showBackButton = false }) => {
                     </Link>
                     <Link
                       to="/my-devices"
-                      onClick={(e) => { e.stopPropagation(); setShowMenu(false); }}
+                      onClick={(e) => { e.stopPropagation(); setTimeout(() => setShowMenu(false), 100); }}
                       className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
                     >
                       <Smartphone className="w-4 h-4 text-gray-500" />
@@ -167,7 +167,7 @@ const Navbar = ({ title = "ADYK Online", showBackButton = false }) => {
                     </Link>
                     <Link
                       to="/my-subscriptions"
-                      onClick={(e) => { e.stopPropagation(); setShowMenu(false); }}
+                      onClick={(e) => { e.stopPropagation(); setTimeout(() => setShowMenu(false), 100); }}
                       className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
                     >
                       <CreditCard className="w-4 h-4 text-gray-500" />

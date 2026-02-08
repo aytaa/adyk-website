@@ -66,6 +66,8 @@ const useVesselWebSocket = () => {
             flag: v.flag || 'TR',
             userId: v.userId,
             userName: v.userName || '',
+            ownerIsDoctor: v.ownerIsDoctor || false,
+            ownerIsDiver: v.ownerIsDiver || false,
             status: v.status || 'offline',
             lastUpdate: v.lastUpdate,
             mapped: v.mapped,

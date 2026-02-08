@@ -22,7 +22,9 @@ const FilterPanel = ({ filters, onFilterChange, vesselTypes = [], statusOptions 
     return filters.vesselType ||
            filters.status ||
            filters.minSpeed !== undefined ||
-           filters.maxSpeed !== undefined
+           filters.maxSpeed !== undefined ||
+           filters.onlyDoctors ||
+           filters.onlyDivers
   }
 
   return (
@@ -88,6 +90,31 @@ const FilterPanel = ({ filters, onFilterChange, vesselTypes = [], statusOptions 
                 <option key={status.value} value={status.value}>{status.label}</option>
               ))}
             </select>
+          </div>
+
+          {/* Doctor & Diver Filter */}
+          <div>
+            <h4 className="text-xs font-semibold text-gray-700 mb-1.5">Sahip Özellikleri</h4>
+            <div className="space-y-1.5">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={filters.onlyDoctors || false}
+                  onChange={(e) => onFilterChange({ ...filters, onlyDoctors: e.target.checked || undefined })}
+                  className="w-3.5 h-3.5 rounded border-gray-300 text-adyk-ocean focus:ring-adyk-ocean"
+                />
+                <span className="text-xs text-gray-700">Doktorlar</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={filters.onlyDivers || false}
+                  onChange={(e) => onFilterChange({ ...filters, onlyDivers: e.target.checked || undefined })}
+                  className="w-3.5 h-3.5 rounded border-gray-300 text-adyk-ocean focus:ring-adyk-ocean"
+                />
+                <span className="text-xs text-gray-700">Dalgıçlar</span>
+              </label>
+            </div>
           </div>
 
           {/* Speed Filter */}

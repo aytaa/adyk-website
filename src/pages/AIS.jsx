@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef, useMemo } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import VesselSidebar from '../components/VesselSidebar'
 import MapView from '../components/MapView'
 import VesselDetailModal from '../components/VesselDetailModal'
 import useVesselWebSocket from '../hooks/useVesselWebSocket'
-import { logout, getSubscriptionStatus } from '../utils/auth'
-import { LogOut, Loader2, Anchor, Check } from 'lucide-react'
+import { logout, getSubscriptionStatus, getUser } from '../utils/auth'
+import { filterVessels } from '../utils/helpers'
+import { statusOptions } from '../data/mockVessels'
+import { LogOut, Loader2, Anchor, Check, User, Smartphone, CreditCard, ChevronDown } from 'lucide-react'
 
 const AIS = () => {
   const navigate = useNavigate()
@@ -13,12 +15,44 @@ const AIS = () => {
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [subLoading, setSubLoading] = useState(true)
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+  const menuRef = useRef(null)
+  const user = getUser()
+
+  // Lifted filter state — shared between sidebar and map
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filters, setFilters] = useState({})
+
+  const displayName = user?.fullName || user?.name || user?.phone || ''
+  const initial = displayName ? displayName.charAt(0).toUpperCase() : '?'
+
+  // Close menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowMenu(false)
+      }
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [])
 
   // Use WebSocket hook for real-time data
   const { vessels, connected, loading, lastUpdate, error } = useVesselWebSocket()
 
   const isConnected = connected
   const isLoading = loading
+
+  // Derive vessel types from actual data
+  const vesselTypes = useMemo(() => {
+    const types = [...new Set(vessels.map(v => v.vesselType).filter(Boolean))]
+    return types.sort()
+  }, [vessels])
+
+  // Single filtered list used by both sidebar and map
+  const filteredVessels = useMemo(() => {
+    return filterVessels(vessels, searchQuery, filters)
+  }, [vessels, searchQuery, filters])
 
   // Check subscription on mount
   useEffect(() => {
@@ -71,18 +105,74 @@ const AIS = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      {/* Navbar - always above modal overlay */}
-      <div className="bg-slate-700 shadow-lg relative z-[60]">
+      {/* Navbar - z-[10000] to stay above all map fixed controls */}
+      <div className="bg-slate-700 shadow-lg relative z-[10000]">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-12">
-            <div className="text-lg font-bold text-white">ADYK Online - AIS Takip</div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg transition-all duration-200 text-sm font-medium"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Çıkış</span>
-            </button>
+            {/* Logo matching Navbar style — clickable link to homepage */}
+            <Link to="/" className="flex items-center space-x-2 group">
+              <div className="relative">
+                <Anchor className="w-6 h-6 text-white transform group-hover:rotate-12 transition-transform duration-300" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-white tracking-wide">
+                  ADYK Online
+                </h1>
+                <p className="text-[10px] text-gray-300 -mt-0.5">
+                  AIS Takip Sistemi
+                </p>
+              </div>
+            </Link>
+
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+                className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg transition-all duration-200 font-medium text-sm"
+              >
+                <div className="w-6 h-6 bg-adyk-ocean rounded-full flex items-center justify-center text-xs font-bold">
+                  {initial}
+                </div>
+                <span className="max-w-[120px] truncate hidden sm:inline">{displayName}</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showMenu ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showMenu && (
+                <div className="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg py-2 z-[10000]">
+                  <Link
+                    to="/profile"
+                    onClick={(e) => { e.stopPropagation(); setTimeout(() => setShowMenu(false), 100); }}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
+                  >
+                    <User className="w-4 h-4 text-gray-500" />
+                    Profilim
+                  </Link>
+                  <Link
+                    to="/my-devices"
+                    onClick={(e) => { e.stopPropagation(); setTimeout(() => setShowMenu(false), 100); }}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
+                  >
+                    <Smartphone className="w-4 h-4 text-gray-500" />
+                    Cihazlarım
+                  </Link>
+                  <Link
+                    to="/my-subscriptions"
+                    onClick={(e) => { e.stopPropagation(); setTimeout(() => setShowMenu(false), 100); }}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
+                  >
+                    <CreditCard className="w-4 h-4 text-gray-500" />
+                    Aboneliklerim
+                  </Link>
+                  <hr className="my-2 border-gray-200" />
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Çıkış Yap
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -97,7 +187,7 @@ const AIS = () => {
             </span>
           </div>
           <span className="text-xs text-gray-500">
-            {vessels.length} gemi
+            {filteredVessels.length} gemi
           </span>
           {lastUpdate && (
             <span className="text-xs text-gray-400">
@@ -111,13 +201,20 @@ const AIS = () => {
       <div className="flex-1 flex overflow-hidden relative">
         {/* Sidebar */}
         <VesselSidebar
-          vessels={vessels}
+          filteredVessels={filteredVessels}
+          totalCount={vessels.length}
           selectedVessel={selectedVessel}
           onVesselSelect={handleVesselSelect}
           isLoading={isLoading}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          filters={filters}
+          onFilterChange={setFilters}
+          vesselTypes={vesselTypes}
+          statusOptions={statusOptions}
         />
 
-        {/* Map Area */}
+        {/* Map Area — receives filtered vessels */}
         <div className={`flex-1 relative ${!hasActiveSubscription ? 'filter blur-md pointer-events-none' : ''}`}>
           {isLoading ? (
             <div className="w-full h-full flex items-center justify-center bg-blue-50">
@@ -128,7 +225,7 @@ const AIS = () => {
             </div>
           ) : (
             <MapView
-              vessels={vessels}
+              vessels={filteredVessels}
               selectedVessel={selectedVessel}
               onVesselClick={handleMapVesselClick}
               isModalOpen={showDetailModal}
