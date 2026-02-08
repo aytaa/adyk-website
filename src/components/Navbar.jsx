@@ -1,16 +1,35 @@
+import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Anchor, Ship, LogIn, LogOut } from 'lucide-react'
-import { isAuthenticated, logout } from '../utils/auth'
+import { Anchor, Ship, LogIn, LogOut, User, Smartphone, CreditCard, ChevronDown } from 'lucide-react'
+import { isAuthenticated, logout, getUser } from '../utils/auth'
 
 const Navbar = ({ title = "ADYK Online", showBackButton = false }) => {
   const navigate = useNavigate()
   const authenticated = isAuthenticated()
+  const user = getUser()
+  const [showMenu, setShowMenu] = useState(false)
+  const menuRef = useRef(null)
+
+  // Close menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleLogout = () => {
     logout()
+    setShowMenu(false)
     navigate('/')
     window.location.reload()
   }
+
+  const displayName = user?.fullName || user?.name || user?.phone || ''
+  const initial = displayName ? displayName.charAt(0).toUpperCase() : '?'
 
   return (
     <nav className="bg-slate-700 shadow-lg">
@@ -32,7 +51,7 @@ const Navbar = ({ title = "ADYK Online", showBackButton = false }) => {
             </div>
           </Link>
 
-          {/* Navigation Links */}
+          {/* Navigation Links - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
             <Link
               to="/"
@@ -48,13 +67,55 @@ const Navbar = ({ title = "ADYK Online", showBackButton = false }) => {
               <span>AIS Takip</span>
             </Link>
             {authenticated ? (
-              <button
-                onClick={handleLogout}
-                className="flex items-center space-x-2 bg-red-500/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg transition-all duration-200 font-medium text-sm"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Çıkış</span>
-              </button>
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg transition-all duration-200 font-medium text-sm"
+                >
+                  <div className="w-6 h-6 bg-adyk-ocean rounded-full flex items-center justify-center text-xs font-bold">
+                    {initial}
+                  </div>
+                  <span className="max-w-[120px] truncate">{displayName}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showMenu ? 'rotate-180' : ''}`} />
+                </button>
+
+                {showMenu && (
+                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg py-2 z-50">
+                    <Link
+                      to="/profile"
+                      onClick={(e) => { e.stopPropagation(); setShowMenu(false); }}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
+                    >
+                      <User className="w-4 h-4 text-gray-500" />
+                      Profilim
+                    </Link>
+                    <Link
+                      to="/my-devices"
+                      onClick={(e) => { e.stopPropagation(); setShowMenu(false); }}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
+                    >
+                      <Smartphone className="w-4 h-4 text-gray-500" />
+                      Cihazlarım
+                    </Link>
+                    <Link
+                      to="/my-subscriptions"
+                      onClick={(e) => { e.stopPropagation(); setShowMenu(false); }}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
+                    >
+                      <CreditCard className="w-4 h-4 text-gray-500" />
+                      Aboneliklerim
+                    </Link>
+                    <hr className="my-2 border-gray-200" />
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Çıkış Yap
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <Link
                 to="/login"
@@ -75,12 +136,54 @@ const Navbar = ({ title = "ADYK Online", showBackButton = false }) => {
               <Ship className="w-4 h-4" />
             </Link>
             {authenticated ? (
-              <button
-                onClick={handleLogout}
-                className="flex items-center bg-red-500/80 hover:bg-red-600 text-white px-2 py-1.5 rounded-lg transition-all duration-200"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
+              <div className="relative" ref={!showMenu ? undefined : menuRef}>
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="flex items-center bg-white/10 hover:bg-white/20 text-white px-2 py-1.5 rounded-lg transition-all duration-200"
+                >
+                  <div className="w-6 h-6 bg-adyk-ocean rounded-full flex items-center justify-center text-xs font-bold">
+                    {initial}
+                  </div>
+                  <ChevronDown className={`w-3.5 h-3.5 ml-1 transition-transform ${showMenu ? 'rotate-180' : ''}`} />
+                </button>
+
+                {showMenu && (
+                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg py-2 z-50">
+                    <Link
+                      to="/profile"
+                      onClick={(e) => { e.stopPropagation(); setShowMenu(false); }}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
+                    >
+                      <User className="w-4 h-4 text-gray-500" />
+                      Profilim
+                    </Link>
+                    <Link
+                      to="/my-devices"
+                      onClick={(e) => { e.stopPropagation(); setShowMenu(false); }}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
+                    >
+                      <Smartphone className="w-4 h-4 text-gray-500" />
+                      Cihazlarım
+                    </Link>
+                    <Link
+                      to="/my-subscriptions"
+                      onClick={(e) => { e.stopPropagation(); setShowMenu(false); }}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
+                    >
+                      <CreditCard className="w-4 h-4 text-gray-500" />
+                      Aboneliklerim
+                    </Link>
+                    <hr className="my-2 border-gray-200" />
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Çıkış Yap
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <Link
                 to="/login"

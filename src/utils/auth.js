@@ -143,9 +143,10 @@ export const getSubscriptionStatus = async () => {
   return data
 }
 
-export const getPricing = async () => {
+export const getPricing = async (hasTracker = false) => {
   const token = getAccessToken()
-  const response = await fetch(`${BASE_API}/pricing`, {
+  const query = hasTracker !== null && hasTracker !== undefined ? `?hasTracker=${hasTracker}` : ''
+  const response = await fetch(`${BASE_API}/pricing${query}`, {
     headers: { 'Authorization': `Bearer ${token}` },
   })
   const data = await response.json()
@@ -168,6 +169,71 @@ export const createOrder = async (orderData) => {
   const data = await response.json()
   if (!response.ok) {
     throw new Error(data.message || 'Sipariş oluşturulamadı')
+  }
+  return data
+}
+
+export const getMyOrders = async () => {
+  const token = getAccessToken()
+  const response = await fetch(`${BASE_API}/orders/my`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message || 'Siparişler alınamadı')
+  }
+  return data
+}
+
+export const getProfile = async () => {
+  const token = getAccessToken()
+  const response = await fetch(`${BASE_API}/user/profile`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message || 'Profil bilgisi alınamadı')
+  }
+  return data
+}
+
+export const updateProfile = async (profileData) => {
+  const token = getAccessToken()
+  const response = await fetch(`${BASE_API}/user/profile`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(profileData),
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message || 'Profil güncellenemedi')
+  }
+  return data
+}
+
+export const getMyDevices = async () => {
+  const token = getAccessToken()
+  const response = await fetch(`${BASE_API}/user/vessels`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message || 'Cihaz bilgisi alınamadı')
+  }
+  return data
+}
+
+export const getMySubscriptions = async () => {
+  const token = getAccessToken()
+  const response = await fetch(`${BASE_API}/subscription/my`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message || 'Abonelik bilgisi alınamadı')
   }
   return data
 }
