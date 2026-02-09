@@ -24,6 +24,53 @@ export const register = async (name, email, phone, password) => {
   }
 }
 
+export const registerWithPhone = async (name, phoneNumber, email, isDoctor, isDiver) => {
+  const body = { name, phone: phoneNumber }
+  if (email) body.email = email
+  if (isDoctor) body.isDoctor = true
+  if (isDiver) body.isDiver = true
+  const response = await fetch(`${API_URL}/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message || 'Kayıt başarısız')
+  }
+  return data
+}
+
+export const sendRegistrationCode = async (phoneNumber) => {
+  const response = await fetch(`${API_URL}/send-registration-code`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone: phoneNumber }),
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message || 'Kayıt doğrulama kodu gönderilemedi')
+  }
+  return data
+}
+
+export const verifyAndRegister = async (phone, code, name, email, isDoctor, isDiver) => {
+  const body = { phone, code, name }
+  if (email) body.email = email
+  if (isDoctor) body.isDoctor = true
+  if (isDiver) body.isDiver = true
+  const response = await fetch(`${API_URL}/verify-and-register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.message || 'Kayıt doğrulama başarısız')
+  }
+  return data
+}
+
 export const login = async (email, password) => {
   try {
     const response = await fetch(`${API_URL}/login`, {
