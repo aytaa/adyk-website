@@ -124,7 +124,7 @@ const FilterPanel = ({ filters, onFilterChange, vesselTypes = [], statusOptions 
               <input
                 type="number"
                 placeholder="Min"
-                value={filters.minSpeed || ''}
+                value={filters.minSpeed ?? ''}
                 onChange={(e) => onFilterChange({
                   ...filters,
                   minSpeed: e.target.value ? parseFloat(e.target.value) : undefined
@@ -135,7 +135,7 @@ const FilterPanel = ({ filters, onFilterChange, vesselTypes = [], statusOptions 
               <input
                 type="number"
                 placeholder="Max"
-                value={filters.maxSpeed || ''}
+                value={filters.maxSpeed ?? ''}
                 onChange={(e) => onFilterChange({
                   ...filters,
                   maxSpeed: e.target.value ? parseFloat(e.target.value) : undefined

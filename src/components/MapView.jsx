@@ -318,7 +318,7 @@ const MapView = ({ vessels, selectedVessel, onVesselClick, isModalOpen = false }
         {/* Vessel Markers */}
         {vessels.map((vessel) => (
           <Marker
-            key={vessel.mmsi}
+            key={vessel.id || vessel.imei || vessel.mmsi}
             position={[vessel.position.lat, vessel.position.lon]}
             icon={createVesselIcon(vessel)}
             bubblingMouseEvents={false}

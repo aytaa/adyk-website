@@ -89,10 +89,22 @@ const useVesselWebSocket = () => {
             typeName: v.vesselType || 'Bilinmiyor',
             statusName: v.status || 'offline',
             callsign: v.callSign || '',
-            heading: v.position?.direction || 0
+            heading: v.position?.direction || 0,
+            destination: v.destination || ''
           }));
 
-          setVessels(vesselData);
+          // Deduplicate: prefer the entry with the most recent lastUpdate
+          const vesselMap = new Map();
+          for (const vessel of vesselData) {
+            const key = vessel.mmsi || vessel.imei || vessel.id;
+            const existing = vesselMap.get(key);
+            if (!existing || new Date(vessel.lastUpdate) > new Date(existing.lastUpdate)) {
+              vesselMap.set(key, vessel);
+            }
+          }
+          const dedupedVessels = Array.from(vesselMap.values());
+
+          setVessels(dedupedVessels);
           setLoading(false);
           setLastUpdate(new Date(data.timestamp));
           console.log(`[WS] Updated: ${vesselData.length} vessels`);

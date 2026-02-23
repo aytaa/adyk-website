@@ -99,6 +99,22 @@ export const calculateDistance = (lat1, lon1, lat2, lon2) => {
 }
 
 /**
+ * Turkish-safe lowercase for search
+ */
+const turkishLower = (str) => {
+  if (!str) return ''
+  return str
+    .replace(/İ/g, 'i')
+    .replace(/I/g, 'ı')
+    .replace(/Ş/g, 'ş')
+    .replace(/Ğ/g, 'ğ')
+    .replace(/Ü/g, 'ü')
+    .replace(/Ö/g, 'ö')
+    .replace(/Ç/g, 'ç')
+    .toLowerCase()
+}
+
+/**
  * Filter vessels by search query - NEW FORMAT
  */
 export const filterVessels = (vessels, searchQuery, filters = {}) => {
@@ -106,14 +122,14 @@ export const filterVessels = (vessels, searchQuery, filters = {}) => {
 
   // Text search - NEW FIELDS
   if (searchQuery) {
-    const query = searchQuery.toLowerCase()
+    const query = turkishLower(searchQuery)
     filtered = filtered.filter(vessel =>
-      vessel.name?.toLowerCase().includes(query) ||
+      turkishLower(vessel.name).includes(query) ||
       vessel.mmsi?.toString().includes(query) ||
-      vessel.imei?.toLowerCase().includes(query) ||
-      vessel.callSign?.toLowerCase().includes(query) ||
-      vessel.userName?.toLowerCase().includes(query) ||
-      vessel.destination?.toLowerCase().includes(query)
+      vessel.imei?.toString().toLowerCase().includes(query) ||
+      turkishLower(vessel.callSign).includes(query) ||
+      turkishLower(vessel.userName).includes(query) ||
+      turkishLower(vessel.destination).includes(query)
     )
   }
 

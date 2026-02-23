@@ -70,9 +70,9 @@ const VesselSidebar = ({
         ) : (
           filteredVessels.map((vessel) => (
             <VesselCard
-              key={vessel.mmsi}
+              key={vessel.id || vessel.imei || vessel.mmsi}
               vessel={vessel}
-              isSelected={selectedVessel?.mmsi === vessel.mmsi}
+              isSelected={selectedVessel?.id === vessel.id}
               onClick={onVesselSelect}
             />
           ))
